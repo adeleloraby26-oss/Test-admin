@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AM PRO | Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-brand">
+    <div class="logo-box">
+      <img src="../logo.png" alt="AM PRO" onerror="this.style.opacity='0'">
+    </div>
+    <span class="nav-title">AM PRO</span>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <span id="adminName" style="font-size:12px;color:var(--text-dim);"></span>
+    <button class="btn btn-red" id="logoutBtn">Sign Out</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTAINER
+════════════════════════════════════════════ -->
+<div class="container">
+
+  <!-- ACCESS DENIED (shown if not admin) -->
+  <div id="accessDenied">
+    <i class="fa-solid fa-lock" style="font-size:48px;color:var(--apple-red);margin-bottom:16px;display:block"></i>
+    <h2 style="font-size:22px;margin-bottom:8px">Access Denied</h2>
+    <p style="color:var(--text-dim);margin-bottom:20px">This page is for admins only.</p>
+    <a href="../dashboard/index.html" class="btn btn-blue" style="text-decoration:none;display:inline-block">
+      Go to Dashboard
+    </a>
+  </div>
+
+  <!-- ADMIN CONTENT -->
+  <div id="adminContent">
+
+    <!-- ── Stats Bar ── -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-val" id="statUsers">—</div>
+        <div class="stat-lbl">Total Members</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statVerified">—</div>
+        <div class="stat-lbl">Verified</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statTasks">—</div>
+        <div class="stat-lbl">Total Tasks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statAdmins">—</div>
+        <div class="stat-lbl">Admins</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── Members List ── -->
+    <div class="section-hdr">
+      <div style="display:flex;align-items:center">
+        <span class="section-title">Members</span>
+        <span class="section-sub" id="userCountLabel"></span>
+      </div>
+    </div>
+
+    <input
+      class="search-bar"
+      id="searchInput"
+      placeholder="🔍  Search by name, username, or field…"
+      oninput="filterUsers()"
+    >
+
+    <div id="userList"></div>
+
+  </div><!-- /adminContent -->
+</div><!-- /container -->
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL — Change Password
+════════════════════════════════════════════ -->
+<div class="overlay hidden" id="pwModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('pwModal')">×</button>
+    <div class="modal-title">Change Password</div>
+    <label class="modal-label">New Password</label>
+    <input class="modal-input" id="pwInput" type="password" placeholder="Min 6 characters">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('pwModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="confirmChangePassword()">Update</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL — Change Rank / Level
+════════════════════════════════════════════ -->
+<div class="overlay hidden" id="rankModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('rankModal')">×</button>
+    <div class="modal-title">Change Rank / Level</div>
+    <label class="modal-label">Level (1 – 999)</label>
+    <input class="modal-input" id="rankInput" type="number" min="1" max="999" placeholder="e.g. 15">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('rankModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="confirmChangeRank()">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL — Delete Confirm
+════════════════════════════════════════════ -->
+<div class="overlay hidden" id="deleteModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('deleteModal')">×</button>
+    <div class="modal-title" style="color:var(--apple-red)">Delete Account</div>
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;line-height:1.6">
+      This will permanently delete
+      <strong id="deleteTargetName" style="color:#fff"></strong>'s
+      account — including their <strong style="color:#fff">auth record, profile row, all tasks,
+      and avatar</strong>. This cannot be undone.
+    </p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancel</button>
+      <button class="btn btn-red" style="background:var(--apple-red);color:#fff" onclick="confirmDelete()">
+        Delete Forever
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     TOAST
+════════════════════════════════════════════ -->
+<div id="toast"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AM PRO - Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🛡️</div>
+      <div class="login-title">AM PRO Admin</div>
+      <div class="login-sub">Sign in to access the control panel</div>
+    </div>
+    <div class="login-field">
+      <label class="login-label">Username</label>
+      <input class="login-input" id="loginUser" type="text" placeholder="admin" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <label class="login-label">Password</label>
+      <input class="login-input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError">Invalid username or password</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+
+  <!-- TOP BAR -->
+  <div class="admin-topbar">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div class="admin-logo">
+      <div class="admin-logo-icon"><i class="fa-solid fa-shield-halved" style="color:#fff;font-size:15px"></i></div>
+      <span class="admin-logo-text">AM PRO</span>
+      <span class="admin-logo-badge">ADMIN</span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <span class="topbar-user"><i class="fa-solid fa-user-shield" style="color:#6366f1"></i> <span id="adminUsername">admin</span></span>
+    <button class="logout-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- SIDEBAR -->
+    <div class="admin-sidebar" id="adminSidebar">
+      <div class="admin-nav-section">Overview</div>
+      <div class="admin-nav-item active" onclick="showAdminPage('overview',this)">
+        <i class="fa-solid fa-gauge-high"></i> Dashboard
+      </div>
+
+      <div class="admin-nav-section">Members</div>
+      <div class="admin-nav-item" onclick="showAdminPage('users',this)">
+        <i class="fa-solid fa-users"></i> Users
+      </div>
+      <div class="admin-nav-item" onclick="showAdminPage('tasks',this)">
+        <i class="fa-solid fa-list-check"></i> Tasks
+      </div>
+
+      <div class="admin-nav-section">System</div>
+      <div class="admin-nav-item" onclick="showAdminPage('ranks',this)">
+        <i class="fa-solid fa-ranking-star"></i> Ranks
+      </div>
+      <div class="admin-nav-item" onclick="showAdminPage('titles',this)">
+        <i class="fa-solid fa-tag"></i> Titles
+      </div>
+      <div class="admin-nav-section">Messages</div>
+      <div class="admin-nav-item" onclick="showAdminPage('messages',this)">
+        <i class="fa-solid fa-comments"></i> Team Chat
+      </div>
+      <div class="admin-nav-section">Requests</div>
+      <div class="admin-nav-item" onclick="showAdminPage('submissions',this)">
+        <i class="fa-solid fa-paper-plane"></i> Task Submissions
+      </div>
+      <div class="admin-nav-item" onclick="showAdminPage('deletions',this)">
+        <i class="fa-solid fa-trash-can"></i> Delete Requests
+      </div>
+      <div class="admin-nav-section">Notifications</div>
+      <div class="admin-nav-item" onclick="showAdminPage('notify',this)">
+        <i class="fa-solid fa-bell"></i> Send Notification
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="admin-content">
+
+      <!-- OVERVIEW -->
+      <div class="admin-page active" id="ap-overview">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>Dashboard</h1>
+            <p>Overview of your AM PRO platform</p>
+          </div>
+          <button class="btn-primary" onclick="loadOverview()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="stats-grid" id="overviewStats">
+          <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val" id="stat-users">—</div><div class="stat-lbl">Total Users</div></div>
+          <div class="stat-card"><div class="stat-icon">🟢</div><div class="stat-val" id="stat-online">—</div><div class="stat-lbl">Online Now</div></div>
+          <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-val" id="stat-tasks">—</div><div class="stat-lbl">Total Tasks</div></div>
+          <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-val" id="stat-msgs">—</div><div class="stat-lbl">Team Messages</div></div>
+          <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-val" id="stat-ranks">—</div><div class="stat-lbl">Rank Tiers</div></div>
+          <div class="stat-card"><div class="stat-icon">🏷️</div><div class="stat-val" id="stat-titles">—</div><div class="stat-lbl">Titles</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-top"><span class="table-title">🏆 Top Members</span></div>
+          <table><thead><tr><th>#</th><th>User</th><th>Points</th><th>Rank</th></tr></thead>
+          <tbody id="overviewTopUsers"><tr class="loading-row"><td colspan="4">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="admin-page" id="ap-users">
+        <div class="page-hdr">
+          <div class="page-hdr-left"><h1>Users</h1><p>Manage all team members</p></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <div class="search-box"><i class="fa-solid fa-magnifying-glass" style="color:var(--muted);font-size:12px"></i><input placeholder="Search users..." oninput="filterUsersTable(this.value)" id="userSearch"/></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>User</th><th>Points</th><th>Rank</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="usersTableBody"><tr class="loading-row"><td colspan="5">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- TASKS -->
+      <div class="admin-page" id="ap-tasks">
+        <div class="page-hdr">
+          <div class="page-hdr-left"><h1>Tasks</h1><p>Assign and manage tasks</p></div>
+          <button class="btn-primary" onclick="openModal('taskModal')"><i class="fa-solid fa-plus"></i> New Task</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Title</th><th>Assigned To</th><th>Points</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="tasksTableBody"><tr class="loading-row"><td colspan="5">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- RANKS -->
+      <div class="admin-page" id="ap-ranks">
+        <div class="page-hdr">
+          <div class="page-hdr-left"><h1>Ranks</h1><p>Manage rank tiers and requirements</p></div>
+          <button class="btn-primary" onclick="openModal('rankModal')"><i class="fa-solid fa-plus"></i> New Rank</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Rank</th><th>Min Points</th><th>Max Points</th><th>Icon</th><th>Actions</th></tr></thead>
+          <tbody id="ranksTableBody"><tr class="loading-row"><td colspan="5">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- TITLES -->
+      <div class="admin-page" id="ap-titles">
+        <div class="page-hdr">
+          <div class="page-hdr-left"><h1>Titles</h1><p>Create special titles for users</p></div>
+          <button class="btn-primary" onclick="openModal('titleModal')"><i class="fa-solid fa-plus"></i> New Title</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Title</th><th>Color</th><th>Animation</th><th>Actions</th></tr></thead>
+          <tbody id="titlesTableBody"><tr class="loading-row"><td colspan="4">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="admin-page" id="ap-messages">
+        <div class="page-hdr">
+          <div class="page-hdr-left"><h1>Team Chat</h1><p>View and moderate team messages</p></div>
+          <button class="btn-primary" onclick="loadMessages()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Sender</th><th>Message</th><th>Type</th><th>Time</th><th>Actions</th></tr></thead>
+          <tbody id="msgsTableBody"><tr class="loading-row"><td colspan="5">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- SUBMISSIONS -->
+      <div class="admin-page" id="ap-submissions">
+        <div class="page-hdr">
+          <div class="page-hdr-left"><h1>Task Submissions</h1><p>Review and approve task submissions</p></div>
+          <button class="btn-primary" onclick="loadSubmissions()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>User</th><th>Task</th><th>Points</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="submissionsBody"><tr class="loading-row"><td colspan="5">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- DELETE REQUESTS -->
+      <div class="admin-page" id="ap-deletions">
+        <div class="page-hdr">
+          <div class="page-hdr-left"><h1>Delete Requests</h1><p>Review account deletion requests</p></div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>User</th><th>Reason</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="deletionsBody"><tr class="loading-row"><td colspan="5">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- NOTIFY -->
+      <div class="admin-page" id="ap-notify">
+        <div class="page-hdr">
+          <div class="page-hdr-left"><h1>Send Notification</h1><p>Broadcast notifications to users</p></div>
+        </div>
+        <div class="table-wrap" style="padding:24px">
+          <div class="form-field">
+            <label class="form-label">Target</label>
+            <select class="form-input" id="notifTarget">
+              <option value="all">All Users</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Title</label>
+            <input class="form-input" id="notifTitle" placeholder="Notification title"/>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Message</label>
+            <textarea class="form-input" id="notifBody" rows="4" placeholder="Write your message..."></textarea>
+          </div>
+          <button class="btn-primary" onclick="sendNotification()"><i class="fa-solid fa-paper-plane"></i> Send Notification</button>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-body -->
+</div><!-- /adminApp -->
+
+<!-- MODALS -->
+
+<!-- Edit User Modal -->
+<div class="modal-overlay hidden" id="userEditModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      Edit User
+      <button class="modal-close-btn" onclick="closeModal('userEditModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <input type="hidden" id="editUserId"/>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Display Name</label>
+        <input class="form-input" id="editUserName" placeholder="Name"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="editUserUsername" placeholder="username"/>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Points</label>
+      <input class="form-input" id="editUserPoints" type="number" placeholder="0"/>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Bio</label>
+      <textarea class="form-input" id="editUserBio" rows="3" placeholder="User bio..."></textarea>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Title</label>
+      <select class="form-input" id="editUserTitle">
+        <option value="">No Title</option>
+      </select>
+    </div>
+    <div class="form-field" style="display:flex;align-items:center;gap:12px;padding-top:4px">
+      <input type="checkbox" id="editUserVerified" style="width:16px;height:16px;cursor:pointer;accent-color:#6366f1"/>
+      <label for="editUserVerified" class="form-label" style="margin:0;cursor:pointer">Verified Badge</label>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closeModal('userEditModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveUser()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div class="modal-overlay hidden" id="taskModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="taskModalTitle">New Task</span>
+      <button class="modal-close-btn" onclick="closeModal('taskModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <input type="hidden" id="editTaskId"/>
+    <div class="form-field">
+      <label class="form-label">Assign To</label>
+      <select class="form-input" id="taskUser"></select>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Task Title</label>
+      <input class="form-input" id="taskTitle" placeholder="Task title"/>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="taskBody" rows="3" placeholder="Task description..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Points</label>
+        <input class="form-input" id="taskPoints" type="number" placeholder="100"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="taskStatus">
+          <option value="pending">Pending</option>
+          <option value="submitted">Submitted</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Link (optional)</label>
+      <input class="form-input" id="taskLink" placeholder="https://..."/>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closeModal('taskModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveTask()"><i class="fa-solid fa-floppy-disk"></i> Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rank Modal -->
+<div class="modal-overlay hidden" id="rankModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="rankModalTitle">New Rank</span>
+      <button class="modal-close-btn" onclick="closeModal('rankModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <input type="hidden" id="editRankId"/>
+    <div class="form-field">
+      <label class="form-label">Rank Name</label>
+      <input class="form-input" id="rankName" placeholder="e.g. Diamond"/>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Min Points</label>
+        <input class="form-input" id="rankMin" type="number" placeholder="0"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Max Points</label>
+        <input class="form-input" id="rankMax" type="number" placeholder="999"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Gradient From</label>
+        <input class="form-input" id="rankGradFrom" type="color" value="#6366f1"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Gradient To</label>
+        <input class="form-input" id="rankGradTo" type="color" value="#a78bfa"/>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Icon (sword / crown / gem / flame / trophy / star / zap / wind)</label>
+      <input class="form-input" id="rankIcon" placeholder="sword"/>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closeModal('rankModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveRank()"><i class="fa-solid fa-floppy-disk"></i> Save Rank</button>
+    </div>
+  </div>
+</div>
+
+<!-- Title Modal -->
+<div class="modal-overlay hidden" id="titleModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="titleModalTitle">New Title</span>
+      <button class="modal-close-btn" onclick="closeModal('titleModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <input type="hidden" id="editTitleId"/>
+    <div class="form-field">
+      <label class="form-label">Title Name</label>
+      <input class="form-input" id="titleName" placeholder="e.g. OG Member"/>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Text Color</label>
+        <input class="form-input" id="titleColor" type="color" value="#a78bfa"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Glow Color</label>
+        <input class="form-input" id="titleGlow" type="color" value="#6366f1"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Gradient From</label>
+        <input class="form-input" id="titleGradFrom" type="color" value="#6366f1"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Gradient To</label>
+        <input class="form-input" id="titleGradTo" type="color" value="#a78bfa"/>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Animation</label>
+      <select class="form-input" id="titleAnim">
+        <option value="">None</option>
+        <option value="pulse">Pulse</option>
+        <option value="shimmer">Shimmer</option>
+        <option value="rainbow">Rainbow</option>
+        <option value="fire">Fire</option>
+        <option value="electric">Electric</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closeModal('titleModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveTitle()"><i class="fa-solid fa-floppy-disk"></i> Save Title</button>
+    </div>
+  </div>
+</div>
+
+<!-- Award Title Modal -->
+<div class="modal-overlay hidden" id="awardTitleModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      Award Title to User
+      <button class="modal-close-btn" onclick="closeModal('awardTitleModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <input type="hidden" id="awardUserId"/>
+    <div class="form-field">
+      <label class="form-label">Select Title</label>
+      <select class="form-input" id="awardTitleSelect"></select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closeModal('awardTitleModal')">Cancel</button>
+      <button class="btn-primary" onclick="doAwardTitle()"><i class="fa-solid fa-award"></i> Award Title</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminToast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
